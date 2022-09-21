@@ -99,6 +99,7 @@ func generate(l string, f string, n int) {
 		content, err := getContent(mainPage)
 		if err != nil {
 			log.Printf("Skipped %s %s for failed to getContent: %s\n", date.Format("2006-01-02"), title, err)
+			return
 		}
 
 		feed.Items = append(feed.Items, &feeds.Item{
