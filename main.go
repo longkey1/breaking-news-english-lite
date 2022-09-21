@@ -122,7 +122,7 @@ func generate(l string, f string, n int) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fp, err := os.Create(path.Join(DIST_DIR, fmt.Sprintf("%s.feed", l)))
+	fp, err := os.Create(path.Join(DIST_DIR, fmt.Sprintf("%s.xml", l)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -135,7 +135,7 @@ func generate(l string, f string, n int) {
 		log.Fatal(err)
 	}
 
-	log.Printf("generated: %s", path.Join(DIST_DIR, fmt.Sprintf("%s.feed", l)))
+	log.Printf("generated: %s", path.Join(DIST_DIR, fmt.Sprintf("%s.xml", l)))
 }
 
 func getContent(page string) (Content, error) {
