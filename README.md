@@ -1,2 +1,2 @@
-# bnea
-Breaking News English Alternative
+# breaking-news-english-altenative-feeds.git
+Breaking News English Alternative Feeds
