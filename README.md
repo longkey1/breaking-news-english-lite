@@ -1,2 +1,2 @@
-# breaking-news-english-altenative-feeds.git
-Breaking News English Alternative Feeds
+# breaking-news-english-feeds.git
+Customized Feeds of Breaking News English
