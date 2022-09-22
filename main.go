@@ -39,6 +39,7 @@ type Content struct {
 //}
 var levels = map[string]string{
 	"level3": "graded-news-stories.html",
+	"level6": "news-for-kids.html",
 }
 
 func main() {
@@ -51,7 +52,7 @@ func generate(l string, f string, n int) {
 	now := time.Now()
 
 	feed := &feeds.Feed{
-		Title:       fmt.Sprintf("%s %s", BASE_TITLE, strings.ToTitle(l)),
+		Title:       fmt.Sprintf("%s %s", BASE_TITLE, strings.Title(l)),
 		Link:        &feeds.Link{Href: fmt.Sprintf("%s%s", BASE_URL, f)},
 		Description: "",
 		Author:      &feeds.Author{Name: "longkey1", Email: "longkey1@gmail.com"},
@@ -75,7 +76,7 @@ func generate(l string, f string, n int) {
 
 	feed.Items = []*feeds.Item{}
 	doc.Find("#primary li").Each(func(i int, s *goquery.Selection) {
-		if len(feed.Items) > n {
+		if len(feed.Items) == n {
 			return
 		}
 
