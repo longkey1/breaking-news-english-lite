@@ -1,3 +1,3 @@
 /.cache
-/pages
+/pages/**/*.xml
 /vendor
