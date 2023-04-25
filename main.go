@@ -11,6 +11,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gorilla/feeds"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -28,18 +29,17 @@ type Content struct {
 	AudioLength   string
 }
 
-//var levels = map[string]string{
-//	"level0": "easy-news-english.html",
-//	"level1": "simple-english-news.html",
-//	"level2": "easy-english-news.html",
-//	"level3": "graded-news-stories.html",
-//	"level4": "graded-news-articles.html",
-//	"level5": "english-news-readings.html",
-//	"level6": "news-for-kids.html",
-//}
 var levels = map[string]string{
+	"level0": "easy-news-english.html",
+	"level1": "simple-english-news.html",
+	"level2": "easy-english-news.html",
 	"level3": "graded-news-stories.html",
+	"level4": "graded-news-articles.html",
+	"level5": "english-news-readings.html",
 	"level6": "news-for-kids.html",
+}
+var americanAccent = []string{
+	"level3", "level6",
 }
 
 func main() {
@@ -97,7 +97,7 @@ func generate(l string, f string, n int) {
 		// page
 		href, _ := s.Find("a").Attr("href")
 		mainPage := fmt.Sprintf("https://breakingnewsenglish.com/%s", strings.TrimSpace(href))
-		content, err := getContent(mainPage)
+		content, err := getContent(l, mainPage)
 		if err != nil {
 			log.Printf("Skipped %s %s for failed to getContent: %s\n", date.Format("2006-01-02"), title, err)
 			return
@@ -140,7 +140,7 @@ func generate(l string, f string, n int) {
 	log.Printf("generated: %s", path.Join(DIST_DIR, fmt.Sprintf("%s.xml", l)))
 }
 
-func getContent(page string) (Content, error) {
+func getContent(level string, page string) (Content, error) {
 	res, err := http.Get(page)
 	if err != nil {
 		return Content{}, fmt.Errorf("failed to get html: %w", err)
@@ -158,7 +158,10 @@ func getContent(page string) (Content, error) {
 
 	listeningPage := strings.Replace(page, ".html", "-l.html", 1)
 	text := strings.TrimSpace(doc.Find("article").Text())
-	audio := strings.Replace(page, ".html", "-a.mp3", 1)
+	audio := strings.Replace(page, ".html", ".mp3", 1)
+	if slices.Contains(americanAccent, level) {
+		audio = strings.Replace(page, ".html", "-a.mp3", 1)
+	}
 	audioLength, err := getAudioLength(audio)
 	if err != nil {
 		return Content{}, fmt.Errorf("failed to get audio length: %w", err)
