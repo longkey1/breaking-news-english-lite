@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	BASE_TITLE      = "Breaking News English"
+	BASE_TITLE      = "Breaking News English Lite"
 	BASE_URL        = "https://breakingnewsenglish.com/"
 	DIST_DIR        = "pages"
 	NUMBER_OF_ITEMS = 30
