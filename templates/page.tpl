@@ -11,5 +11,6 @@
     <li><a href="{{ $c.ListeningPage }}">{{ $c.Date.Format "2006/01/02" }} - {{ $c.Title }}</a></li>
 {{ end }}
 </ul>
+<p><a href="{{ .Feed }}">Feeds</a></p>
 </body>
 </html>

@@ -148,6 +148,7 @@ func generate(l string, f string, n int) {
 
 	values := map[string]interface{}{
 		"Title":    fmt.Sprintf("%s %s", BASE_TITLE, strings.Title(l)),
+		"Feed":     fmt.Sprintf("%s.xml", l),
 		"Contents": Contents,
 	}
 	if err = tpl.ExecuteTemplate(fp2, "page.tpl", values); err != nil {
