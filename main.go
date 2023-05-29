@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -23,6 +25,8 @@ const (
 
 type Content struct {
 	MainPage      string
+	Title         string
+	Date          time.Time
 	ListeningPage string
 	Text          string
 	Audio         string
@@ -63,7 +67,12 @@ func generate(l string, f string, n int) {
 	if err != nil {
 		log.Fatalf("failed to get html: %s", err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != 200 {
 		log.Fatalf("failed to fetch data: %d %s", resp.StatusCode, resp.Status)
@@ -74,40 +83,27 @@ func generate(l string, f string, n int) {
 		log.Fatalf("failed to load html: %s", err)
 	}
 
+	Contents := []*Content{}
 	feed.Items = []*feeds.Item{}
 	doc.Find("#primary li").Each(func(i int, s *goquery.Selection) {
 		if len(feed.Items) == n {
 			return
 		}
 
-		// date
-		d := strings.Replace(strings.TrimSpace(s.Find("tt").Text()), ":", "", 1)
-		if len(d) == 0 {
+		// content
+		content, err := newContent(l, s)
+		if err != nil {
+			log.Printf("skipped %3d, %s", i, err)
 			return
 		}
-		date, err := time.Parse("2006-01-02", d)
-		if err != nil {
-			log.Fatalf("failed to parse date: %s", err)
-		}
-
-		// title
-		title := strings.TrimSpace(s.Find("a").Text())
-		log.Printf("%s %s", date.Format("2006-01-02"), title)
-
-		// page
-		href, _ := s.Find("a").Attr("href")
-		mainPage := fmt.Sprintf("https://breakingnewsenglish.com/%s", strings.TrimSpace(href))
-		content, err := getContent(l, mainPage)
-		if err != nil {
-			log.Printf("Skipped %s %s for failed to getContent: %s\n", date.Format("2006-01-02"), title, err)
-			return
-		}
+		Contents = append(Contents, &content)
+		log.Printf("%s %s", content.Date.Format("2006-01-02"), content.Title)
 
 		feed.Items = append(feed.Items, &feeds.Item{
-			Title:       title,
+			Title:       content.Title,
 			Link:        &feeds.Link{Href: content.ListeningPage},
 			Description: content.Text,
-			Created:     date,
+			Created:     content.Date,
 			Enclosure:   &feeds.Enclosure{Url: content.Audio, Type: "audio/mpeg", Length: content.AudioLength},
 		})
 
@@ -124,6 +120,7 @@ func generate(l string, f string, n int) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	fp, err := os.Create(path.Join(DIST_DIR, fmt.Sprintf("%s.xml", l)))
 	if err != nil {
 		log.Fatal(err)
@@ -138,14 +135,58 @@ func generate(l string, f string, n int) {
 	}
 
 	log.Printf("generated: %s", path.Join(DIST_DIR, fmt.Sprintf("%s.xml", l)))
+
+	fp2, err := os.Create(path.Join(DIST_DIR, fmt.Sprintf("%s.html", l)))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func(fp2 *os.File) {
+		_ = fp2.Close()
+	}(fp2)
+
+	tpl := template.Must(template.ParseFiles("templates/page.tpl"))
+
+	values := map[string]interface{}{
+		"Title":    fmt.Sprintf("%s %s", BASE_TITLE, strings.Title(l)),
+		"Contents": Contents,
+	}
+	if err = tpl.ExecuteTemplate(fp2, "page.tpl", values); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("generated: %s", path.Join(DIST_DIR, fmt.Sprintf("%s.html", l)))
 }
 
-func getContent(level string, page string) (Content, error) {
-	res, err := http.Get(page)
+func newContent(l string, s *goquery.Selection) (Content, error) {
+	// date
+	d := strings.Replace(strings.TrimSpace(s.Find("tt").Text()), ":", "", 1)
+	if len(d) == 0 {
+		return Content{}, fmt.Errorf("not found date string from %s page", l)
+	}
+	date, err := time.Parse("2006-01-02", d)
+	if err != nil {
+		return Content{}, fmt.Errorf("failed to parse date: %w", err)
+	}
+
+	// title
+	title := strings.TrimSpace(s.Find("a").Text())
+
+	// href
+	href, _ := s.Find("a").Attr("href")
+
+	// mainPage
+	mainPage := fmt.Sprintf("https://breakingnewsenglish.com/%s", strings.TrimSpace(href))
+
+	// listingPage, text, audio, audiolength
+	res, err := http.Get(mainPage)
 	if err != nil {
 		return Content{}, fmt.Errorf("failed to get html: %w", err)
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+		}
+	}(res.Body)
 
 	if res.StatusCode != 200 {
 		return Content{}, fmt.Errorf("failed to fetch data: %d, %s", res.StatusCode, res.Status)
@@ -153,14 +194,17 @@ func getContent(level string, page string) (Content, error) {
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatalf("failed to load html: %s", err)
+		return Content{}, fmt.Errorf("failed to load html: %w", err)
 	}
 
-	listeningPage := strings.Replace(page, ".html", "-l.html", 1)
+	listeningPage := strings.Replace(mainPage, ".html", "l.html", 1)
+	if slices.Contains(americanAccent, l) {
+		listeningPage = strings.Replace(mainPage, ".html", "-l.html", 1)
+	}
 	text := strings.TrimSpace(doc.Find("article").Text())
-	audio := strings.Replace(page, ".html", ".mp3", 1)
-	if slices.Contains(americanAccent, level) {
-		audio = strings.Replace(page, ".html", "-a.mp3", 1)
+	audio := strings.Replace(mainPage, ".html", ".mp3", 1)
+	if slices.Contains(americanAccent, l) {
+		audio = strings.Replace(mainPage, ".html", "-a.mp3", 1)
 	}
 	audioLength, err := getAudioLength(audio)
 	if err != nil {
@@ -168,7 +212,9 @@ func getContent(level string, page string) (Content, error) {
 	}
 
 	return Content{
-		MainPage:      page,
+		Title:         title,
+		MainPage:      mainPage,
+		Date:          date,
 		ListeningPage: listeningPage,
 		Text:          text,
 		Audio:         audio,
@@ -181,7 +227,12 @@ func getAudioLength(file string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to get audio file: %w", err)
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+
+		}
+	}(res.Body)
 
 	if res.StatusCode != 200 {
 		return "", fmt.Errorf("failed to fetch audio file: %s, status code: %d, status: %s", file, res.StatusCode, res.Status)
