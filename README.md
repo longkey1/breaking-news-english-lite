@@ -1,2 +1,3 @@
-# breaking-news-english-feeds.git
-Customized Feeds of Breaking News English
+# breaking-news-english-lite
+
+Customized Feeds and Pages of [Breaking News English](https://breakingnewsenglish.com/)
