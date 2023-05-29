@@ -8,7 +8,7 @@
   </head>
   <body>
     <div class="container">
-        <div class="text-center mt-5">
+        <div class="text-right mt-5">
           <h1>{{ .Title }}</h1>
           <ul>
           {{ range $c := .Contents }}
