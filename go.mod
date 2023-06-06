@@ -1,4 +1,4 @@
-module github.com/longkey1/bnea
+module github.com/longkey1/breaking-news-english-lite
 
 go 1.18
 
