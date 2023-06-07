@@ -147,9 +147,10 @@ func generate(l string, f string, n int) {
 	tpl := template.Must(template.ParseFiles("templates/page.tpl"))
 
 	values := map[string]interface{}{
-		"Title":    fmt.Sprintf("%s %s", BASE_TITLE, strings.Title(l)),
-		"Feed":     fmt.Sprintf("%s.xml", l),
-		"Contents": Contents,
+		"Title":     fmt.Sprintf("%s %s", BASE_TITLE, strings.Title(l)),
+		"Feed":      fmt.Sprintf("%s.xml", l),
+		"Contents":  Contents,
+		"UpdatedAt": now,
 	}
 	if err = tpl.ExecuteTemplate(fp2, "page.tpl", values); err != nil {
 		log.Fatal(err)
