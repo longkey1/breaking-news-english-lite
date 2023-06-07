@@ -8,7 +8,7 @@
   </head>
   <body>
     <div class="container">
-      <div class="text-right mt-5">
+      <div class="mt-5">
         <h1>{{ .Title }}</h1>
         <ul>
         {{ range $c := .Contents }}
@@ -16,11 +16,11 @@
         {{ end }}
         </ul>
       </div>
-      <div class="text-right mt-5">
+      <div>
         <a href="{{ .Feed }}">Feed</a>
       </div>
-      <div class="text-left mt-5">
-        <p>Updated at {{ .UpdateAt }}"></p>
+      <div>
+        <p>Updated at {{ .UpdatedAt }}"></p>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
