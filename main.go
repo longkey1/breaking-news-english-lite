@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -47,9 +48,12 @@ var americanAccent = []string{
 }
 
 func main() {
+	var wg sync.WaitGroup
 	for level, file := range levels {
+		wg.Add(1)
 		go generate(level, file, NUMBER_OF_ITEMS)
 	}
+	wg.Wait()
 }
 
 func generate(l string, f string, n int) {
@@ -97,7 +101,7 @@ func generate(l string, f string, n int) {
 			return
 		}
 		Contents = append(Contents, &content)
-		log.Printf("%s %s", content.Date.Format("2006-01-02"), content.Title)
+		log.Printf("%s %s %s", content.Date.Format("2006-01-02"), l, content.Title)
 
 		feed.Items = append(feed.Items, &feeds.Item{
 			Title:       content.Title,
