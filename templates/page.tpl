@@ -20,7 +20,7 @@
         <a href="{{ .Feed }}">Feed</a>
       </div>
       <div>
-        <p>Updated at {{ .UpdatedAt }}"></p>
+        <p>Updated at {{ .UpdatedAt.Format "2006/01/02 15:04:05" }}</p>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
