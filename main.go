@@ -48,7 +48,7 @@ var americanAccent = []string{
 
 func main() {
 	for level, file := range levels {
-		generate(level, file, NUMBER_OF_ITEMS)
+		go generate(level, file, NUMBER_OF_ITEMS)
 	}
 }
 
