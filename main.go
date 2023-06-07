@@ -51,7 +51,10 @@ func main() {
 	var wg sync.WaitGroup
 	for level, file := range levels {
 		wg.Add(1)
-		go generate(level, file, NUMBER_OF_ITEMS)
+		go func(l string, f string) {
+			generate(l, f, NUMBER_OF_ITEMS)
+			defer wg.Done()
+		}(level, file)
 	}
 	wg.Wait()
 }
@@ -112,7 +115,7 @@ func generate(l string, f string, n int) {
 		})
 
 		// sleep
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 	})
 
 	atom, err := feed.ToAtom()
