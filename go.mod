@@ -6,6 +6,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/gorilla/feeds v1.1.1
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
+	golang.org/x/text v0.10.0
 )
 
 require (

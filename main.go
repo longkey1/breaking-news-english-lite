@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"html/template"
 	"io"
 	"log"
@@ -18,10 +20,10 @@ import (
 )
 
 const (
-	BASE_TITLE      = "Breaking News English Lite"
-	BASE_URL        = "https://breakingnewsenglish.com/"
-	DIST_DIR        = "pages"
-	NUMBER_OF_ITEMS = 30
+	BaseTitle     = "Breaking News English Lite"
+	BaseUrl       = "https://breakingnewsenglish.com/"
+	DistDir       = "pages"
+	NumberOfItems = 30
 )
 
 type Content struct {
@@ -55,7 +57,7 @@ func main() {
 	for level, file := range levels {
 		wg.Add(1)
 		go func(l string, f string) {
-			generatePageAndFeed(now, l, f, NUMBER_OF_ITEMS)
+			generatePageAndFeed(now, l, f, NumberOfItems)
 			defer wg.Done()
 		}(level, file)
 	}
@@ -69,7 +71,7 @@ func generateIndex(now time.Time) {
 		"UpdatedAt": now,
 	}
 
-	fp, err := os.Create(path.Join(DIST_DIR, "index.html"))
+	fp, err := os.Create(path.Join(DistDir, "index.html"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,8 +85,8 @@ func generateIndex(now time.Time) {
 
 func generatePageAndFeed(now time.Time, l string, f string, n int) {
 	feed := &feeds.Feed{
-		Title:       fmt.Sprintf("%s %s", BASE_TITLE, strings.Title(l)),
-		Link:        &feeds.Link{Href: fmt.Sprintf("%s%s", BASE_URL, f)},
+		Title:       fmt.Sprintf("%s %s", BaseTitle, cases.Title(language.Und, cases.NoLower).String(l)),
+		Link:        &feeds.Link{Href: fmt.Sprintf("%s%s", BaseUrl, f)},
 		Description: "",
 		Author:      &feeds.Author{Name: "longkey1", Email: "longkey1@gmail.com"},
 		Created:     now,
@@ -143,12 +145,12 @@ func generatePageAndFeed(now time.Time, l string, f string, n int) {
 		log.Fatal(err)
 	}
 
-	err = os.MkdirAll(DIST_DIR, os.ModePerm)
+	err = os.MkdirAll(DistDir, os.ModePerm)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fp, err := os.Create(path.Join(DIST_DIR, fmt.Sprintf("%s.xml", l)))
+	fp, err := os.Create(path.Join(DistDir, fmt.Sprintf("%s.xml", l)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -161,9 +163,9 @@ func generatePageAndFeed(now time.Time, l string, f string, n int) {
 		log.Fatal(err)
 	}
 
-	log.Printf("generated: %s", path.Join(DIST_DIR, fmt.Sprintf("%s.xml", l)))
+	log.Printf("generated: %s", path.Join(DistDir, fmt.Sprintf("%s.xml", l)))
 
-	fp2, err := os.Create(path.Join(DIST_DIR, fmt.Sprintf("%s.html", l)))
+	fp2, err := os.Create(path.Join(DistDir, fmt.Sprintf("%s.html", l)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -174,7 +176,7 @@ func generatePageAndFeed(now time.Time, l string, f string, n int) {
 	tpl := template.Must(template.ParseFiles("templates/page.tpl"))
 
 	values := map[string]interface{}{
-		"Title":     fmt.Sprintf("%s %s", BASE_TITLE, strings.Title(l)),
+		"Title":     fmt.Sprintf("%s %s", BaseTitle, cases.Title(language.Und, cases.NoLower).String(l)),
 		"Feed":      fmt.Sprintf("%s.xml", l),
 		"Contents":  Contents,
 		"UpdatedAt": now,
@@ -183,7 +185,7 @@ func generatePageAndFeed(now time.Time, l string, f string, n int) {
 		log.Fatal(err)
 	}
 
-	log.Printf("generated: %s", path.Join(DIST_DIR, fmt.Sprintf("%s.html", l)))
+	log.Printf("generated: %s", path.Join(DistDir, fmt.Sprintf("%s.html", l)))
 }
 
 func newContent(l string, s *goquery.Selection) (Content, error) {
