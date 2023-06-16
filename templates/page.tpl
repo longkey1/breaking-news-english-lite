@@ -12,7 +12,7 @@
         <h1>{{ .Title }}</h1>
         <ul class="list-group list-group-flush text-left">
         {{ range $c := .Contents }}
-            <li><a href="{{ $c.ListeningPage }}">{{ $c.Date.Format "2006/01/02" }} - {{ $c.Title }}</a></li>
+            <li class="list-group-item"><a href="{{ $c.ListeningPage }}">{{ $c.Date.Format "2006/01/02" }} - {{ $c.Title }}</a></li>
         {{ end }}
         </ul>
       </div>
