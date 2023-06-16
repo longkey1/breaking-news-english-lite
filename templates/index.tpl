@@ -21,6 +21,9 @@
           <li class="list-group-item"><a href="level6.html">Level6</a></li>
         </ul>
       </div>
+      <div class="mt-5">
+        <p class="text-end">Updated at {{ .UpdatedAt.Format "2006-01-02 15:04:05" }}</p>
+      </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
   </body>

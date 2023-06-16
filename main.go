@@ -48,20 +48,40 @@ var americanAccent = []string{
 }
 
 func main() {
+	now := time.Now()
+	generateIndex(now)
+
 	var wg sync.WaitGroup
 	for level, file := range levels {
 		wg.Add(1)
 		go func(l string, f string) {
-			generate(l, f, NUMBER_OF_ITEMS)
+			generatePageAndFeed(now, l, f, NUMBER_OF_ITEMS)
 			defer wg.Done()
 		}(level, file)
 	}
 	wg.Wait()
 }
 
-func generate(l string, f string, n int) {
-	now := time.Now()
+func generateIndex(now time.Time) {
+	tpl := template.Must(template.ParseFiles("templates/index.tpl"))
 
+	values := map[string]interface{}{
+		"UpdatedAt": now,
+	}
+
+	fp, err := os.Create(path.Join(DIST_DIR, "index.html"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func(fp *os.File) {
+		_ = fp.Close()
+	}(fp)
+	if err := tpl.ExecuteTemplate(fp, "index.tpl", values); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func generatePageAndFeed(now time.Time, l string, f string, n int) {
 	feed := &feeds.Feed{
 		Title:       fmt.Sprintf("%s %s", BASE_TITLE, strings.Title(l)),
 		Link:        &feeds.Link{Href: fmt.Sprintf("%s%s", BASE_URL, f)},
@@ -90,7 +110,7 @@ func generate(l string, f string, n int) {
 		log.Fatalf("failed to load html: %s", err)
 	}
 
-	Contents := []*Content{}
+	var Contents []*Content
 	feed.Items = []*feeds.Item{}
 	doc.Find("#primary li").Each(func(i int, s *goquery.Selection) {
 		if len(feed.Items) == n {
