@@ -234,9 +234,6 @@ func newContent(l string, s *goquery.Selection) (Content, error) {
 	}
 	text := strings.TrimSpace(doc.Find("article").Text())
 	audio := strings.Replace(mainPage, ".html", ".mp3", 1)
-	if slices.Contains(americanAccent, l) {
-		audio = strings.Replace(mainPage, ".html", "-a.mp3", 1)
-	}
 	audioLength, err := getAudioLength(audio)
 	if err != nil {
 		return Content{}, fmt.Errorf("failed to get audio length: %w", err)
