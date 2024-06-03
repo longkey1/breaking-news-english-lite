@@ -1,5 +1,7 @@
-# ghc
+# breaking-news-english-lite
+
+Customized Feeds and Pages of [Breaking News English](https://breakingnewsenglish.com/)
 
 ---
 
-Updated by keeper: 2024-06-03T15:11:51+09:00
+Updated at 2024-06-03T15:14:03+09:00
