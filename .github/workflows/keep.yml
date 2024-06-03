@@ -1,0 +1,35 @@
+name: Keep
+
+on:
+  schedule:
+    - cron: '0 15 1 * *' # JST="0 0 1 * *"
+
+  workflow_dispatch:
+
+jobs:
+  keep:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Set timezone
+        run: |
+          echo "TZ=Asia/Tokyo" >> ${GITHUB_ENV}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set updated date
+        run: |
+          echo "UPDATED=$(date +'%Y-%m-%dT%H:%M:%S+09:00')" >> ${GITHUB_ENV}
+
+      - name: Update README
+        run: |
+          envsubst '${UPDATED}' < README.md.dist > README.md
+
+      - name: Commit
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: update README by auto commit"
