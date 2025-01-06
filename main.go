@@ -89,8 +89,12 @@ func generatePageAndFeed(now time.Time, l string, f string, n int, us bool) {
 		return
 	}
 
+	ttlFmt := "%s %s"
+	if us {
+		ttlFmt = "%s(US) %S"
+	}
 	feed := &feeds.Feed{
-		Title:       fmt.Sprintf("%s %s", BaseTitle, cases.Title(language.Und, cases.NoLower).String(l)),
+		Title:       fmt.Sprintf(ttlFmt, BaseTitle, cases.Title(language.Und, cases.NoLower).String(l)),
 		Link:        &feeds.Link{Href: fmt.Sprintf("%s%s", BaseUrl, f)},
 		Description: "",
 		Author:      &feeds.Author{Name: "longkey1", Email: "longkey1@gmail.com"},
@@ -195,9 +199,13 @@ func generatePageAndFeed(now time.Time, l string, f string, n int, us bool) {
 
 	tpl := template.Must(template.ParseFiles("templates/page.tpl"))
 
+	fdFmt := "%s.xml"
+	if us == true {
+		fdFmt = "%s-us.xml"
+	}
 	values := map[string]interface{}{
-		"Title":     fmt.Sprintf("%s %s", BaseTitle, cases.Title(language.Und, cases.NoLower).String(l)),
-		"Feed":      fmt.Sprintf("%s.xml", l),
+		"Title":     fmt.Sprintf(ttlFmt, BaseTitle, cases.Title(language.Und, cases.NoLower).String(l)),
+		"Feed":      fmt.Sprintf(fdFmt, l),
 		"Contents":  Contents,
 		"UpdatedAt": now,
 	}
