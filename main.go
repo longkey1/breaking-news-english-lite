@@ -91,7 +91,7 @@ func generatePageAndFeed(now time.Time, l string, f string, n int, us bool) {
 
 	ttlFmt := "%s %s"
 	if us {
-		ttlFmt = "%s(US) %S"
+		ttlFmt = "%s(US) %s"
 	}
 	feed := &feeds.Feed{
 		Title:       fmt.Sprintf(ttlFmt, BaseTitle, cases.Title(language.Und, cases.NoLower).String(l)),
