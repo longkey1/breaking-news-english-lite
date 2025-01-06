@@ -91,7 +91,7 @@ func generatePageAndFeed(now time.Time, l string, f string, n int, us bool) {
 
 	ttlFmt := "%s %s"
 	if us {
-		ttlFmt = "%s(US) %s"
+		ttlFmt += "(US)"
 	}
 	feed := &feeds.Feed{
 		Title:       fmt.Sprintf(ttlFmt, BaseTitle, cases.Title(language.Und, cases.NoLower).String(l)),
@@ -138,8 +138,8 @@ func generatePageAndFeed(now time.Time, l string, f string, n int, us bool) {
 		// contents
 		Contents = append(Contents, &content)
 		lv := l
-		if us == true {
-			lv = fmt.Sprintf("%s-us", l)
+		if us {
+			lv += "-us"
 		}
 		log.Printf("%s %s %s", lv, content.Date.Format("2006-01-02"), content.Title)
 
@@ -167,7 +167,7 @@ func generatePageAndFeed(now time.Time, l string, f string, n int, us bool) {
 	}
 
 	fpFmt := "%s.xml"
-	if us == true {
+	if us {
 		fpFmt = "%s-us.xml"
 	}
 	fp, err := os.Create(path.Join(DistDir, fmt.Sprintf(fpFmt, l)))
@@ -186,7 +186,7 @@ func generatePageAndFeed(now time.Time, l string, f string, n int, us bool) {
 	log.Printf("generated: %s", path.Join(DistDir, fmt.Sprintf(fpFmt, l)))
 
 	fp2Fmt := "%s.html"
-	if us == true {
+	if us {
 		fp2Fmt = "%s-us.html"
 	}
 	fp2, err := os.Create(path.Join(DistDir, fmt.Sprintf(fp2Fmt, l)))
