@@ -1,4 +1,4 @@
 /.cache
 /pages/**/*.xml
-/pages/level*.html
+/pages/**/*.html
 /vendor

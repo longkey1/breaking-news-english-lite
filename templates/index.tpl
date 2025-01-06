@@ -16,9 +16,11 @@
           <li class="list-group-item"><a href="level1.html">Level1</a></li>
           <li class="list-group-item"><a href="level2.html">Level2</a></li>
           <li class="list-group-item"><a href="level3.html">Level3</a></li>
+          <li class="list-group-item"><a href="level3-us.html">Level3(US)</a></li>
           <li class="list-group-item"><a href="level4.html">Level4</a></li>
           <li class="list-group-item"><a href="level5.html">Level5</a></li>
           <li class="list-group-item"><a href="level6.html">Level6</a></li>
+          <li class="list-group-item"><a href="level6-us.html">Level6(US)</a></li>
         </ul>
       </div>
       <div class="mt-5">

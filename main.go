@@ -45,7 +45,7 @@ var levels = map[string]string{
 	"level5": "english-news-readings.html",
 	"level6": "news-for-kids.html",
 }
-var americanAccent = []string{
+var usLevels = []string{
 	"level3", "level6",
 }
 
@@ -57,7 +57,8 @@ func main() {
 	for level, file := range levels {
 		wg.Add(1)
 		go func(l string, f string) {
-			generatePageAndFeed(now, l, f, NumberOfItems)
+			generatePageAndFeed(now, l, f, NumberOfItems, false)
+			generatePageAndFeed(now, l, f, NumberOfItems, true)
 			defer wg.Done()
 		}(level, file)
 	}
@@ -83,7 +84,11 @@ func generateIndex(now time.Time) {
 	}
 }
 
-func generatePageAndFeed(now time.Time, l string, f string, n int) {
+func generatePageAndFeed(now time.Time, l string, f string, n int, us bool) {
+	if us == true && slices.Contains(usLevels, l) == false {
+		return
+	}
+
 	feed := &feeds.Feed{
 		Title:       fmt.Sprintf("%s %s", BaseTitle, cases.Title(language.Und, cases.NoLower).String(l)),
 		Link:        &feeds.Link{Href: fmt.Sprintf("%s%s", BaseUrl, f)},
@@ -120,14 +125,21 @@ func generatePageAndFeed(now time.Time, l string, f string, n int) {
 		}
 
 		// content
-		content, err := newContent(l, s)
+		content, err := newContent(l, s, us)
 		if err != nil {
 			log.Printf("skipped %3d, %s", i, err)
 			return
 		}
-		Contents = append(Contents, &content)
-		log.Printf("%s %s %s", content.Date.Format("2006-01-02"), l, content.Title)
 
+		// contents
+		Contents = append(Contents, &content)
+		lv := l
+		if us == true {
+			lv = fmt.Sprintf("%s-us", l)
+		}
+		log.Printf("%s %s %s", lv, content.Date.Format("2006-01-02"), content.Title)
+
+		// feed
 		feed.Items = append(feed.Items, &feeds.Item{
 			Title:       content.Title,
 			Link:        &feeds.Link{Href: content.ListeningPage},
@@ -150,7 +162,11 @@ func generatePageAndFeed(now time.Time, l string, f string, n int) {
 		log.Fatal(err)
 	}
 
-	fp, err := os.Create(path.Join(DistDir, fmt.Sprintf("%s.xml", l)))
+	fpFmt := "%s.xml"
+	if us == true {
+		fpFmt = "%s-us.xml"
+	}
+	fp, err := os.Create(path.Join(DistDir, fmt.Sprintf(fpFmt, l)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -163,9 +179,13 @@ func generatePageAndFeed(now time.Time, l string, f string, n int) {
 		log.Fatal(err)
 	}
 
-	log.Printf("generated: %s", path.Join(DistDir, fmt.Sprintf("%s.xml", l)))
+	log.Printf("generated: %s", path.Join(DistDir, fmt.Sprintf(fpFmt, l)))
 
-	fp2, err := os.Create(path.Join(DistDir, fmt.Sprintf("%s.html", l)))
+	fp2Fmt := "%s.html"
+	if us == true {
+		fp2Fmt = "%s-us.html"
+	}
+	fp2, err := os.Create(path.Join(DistDir, fmt.Sprintf(fp2Fmt, l)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -185,10 +205,10 @@ func generatePageAndFeed(now time.Time, l string, f string, n int) {
 		log.Fatal(err)
 	}
 
-	log.Printf("generated: %s", path.Join(DistDir, fmt.Sprintf("%s.html", l)))
+	log.Printf("generated: %s", path.Join(DistDir, fmt.Sprintf(fp2Fmt, l)))
 }
 
-func newContent(l string, s *goquery.Selection) (Content, error) {
+func newContent(l string, s *goquery.Selection, a bool) (Content, error) {
 	// date
 	d := strings.Replace(strings.TrimSpace(s.Find("tt").Text()), ":", "", 1)
 	if len(d) == 0 {
@@ -208,7 +228,7 @@ func newContent(l string, s *goquery.Selection) (Content, error) {
 	// mainPage
 	mainPage := fmt.Sprintf("https://breakingnewsenglish.com/%s", strings.TrimSpace(href))
 
-	// listingPage, text, audio, audiolength
+	// listingPage, text, audio, audioLength
 	res, err := http.Get(mainPage)
 	if err != nil {
 		return Content{}, fmt.Errorf("failed to get html: %w", err)
@@ -229,11 +249,14 @@ func newContent(l string, s *goquery.Selection) (Content, error) {
 	}
 
 	listeningPage := strings.Replace(mainPage, ".html", "l.html", 1)
-	if slices.Contains(americanAccent, l) {
+	if slices.Contains(usLevels, l) {
 		listeningPage = strings.Replace(mainPage, ".html", "-l.html", 1)
 	}
 	text := strings.TrimSpace(doc.Find("article").Text())
 	audio := strings.Replace(mainPage, ".html", ".mp3", 1)
+	if a == true {
+		audio = strings.Replace(mainPage, ".html", "-a.mp3", 1)
+	}
 	audioLength, err := getAudioLength(audio)
 	if err != nil {
 		return Content{}, fmt.Errorf("failed to get audio length: %w", err)
