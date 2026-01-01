@@ -4,4 +4,4 @@ Customized Feeds and Pages of [Breaking News English](https://breakingnewsenglis
 
 ---
 
-Updated at 2025-12-02T00:14:41+09:00
+Updated at 2026-01-02T00:14:11+09:00
